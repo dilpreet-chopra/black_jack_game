@@ -1,0 +1,244 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Black-Jack</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+          <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+          <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script> 
+          <style>
+            .heading-center{
+              margin-left: 330px;
+            }
+            .col-center{
+               margin-left: 450px; 
+               color:#0724C7;
+            }
+            .row-top{
+                margin-top: 100px;
+            }
+             .row-align{
+                margin-top: 40px;
+            }
+            .card{
+                height: 14vh;
+                width: 16vh;
+                color:black;
+
+            }
+            .card-align{
+                margin-left: 260px;
+            }
+            .deck-card{
+                height: 10vh;
+                width: 10vh;
+            }
+            .deck-image{
+                border: 1px;
+            }
+        </style>
+    </head>
+    <body>
+
+        <div class="container">
+            <div class="row">   
+                <div class="col-m-12 heading-center">  
+                <h1>Welcome to Black-Jack</h1>
+                </div> 
+            </div>
+            <div class="row row-align">
+                <div class="col-m-12 col-center"><h4>Computer-Dealer</h4></div>
+            </div>
+
+             <div class="row row-align"> 
+                <div class="col-m-3"> 
+                    <button class="btn btn-secondary-sm deck-image" id="deck_1"><img src="{% static 'blackjack_user/cards.jpeg' %}" width="130px" height="130px" class="img"/></button>
+                </div>
+                <div class="col-m-9 card-align" id="dealer_space">
+                    <button class="btn btn-secondary-sm" disabled = "disabled"><span id="card_1" class="badge badge-secondary d-flex justify-content-center card"></span></button>&nbsp;&nbsp;
+                    <button class="btn btn-secondary-sm" id="dealer-button"><span id="dealer-card" class="badge badge-secondary d-flex justify-content-center card">Click on Card</span></button>
+                </div>
+            </div>
+            <div class="row row-top">
+                <div class="col-m-12 col-center"><h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Player</h4></div>
+            </div>
+            <div class="row row-align">
+                <div class="col-m-3"> 
+                    <button class="btn btn-secondary-sm deck-image" id="deck_2"><img src="{% static 'blackjack_user/cards.jpeg' %}" width="130px" height="130px" class="img"/></button>   
+                </div>
+                <div class="col-m-9 card-align" id="player_space">
+                    <button class="btn btn-secondary-sm" disabled = "disabled"><span id="card_2" class="badge badge-secondary d-flex justify-content-center card"></span></button>
+                    <button class="btn btn-secondary-sm" disabled = "disabled"><span id="card_3" class="badge badge-secondary d-flex justify-content-center card"></span></button>
+                </div>
+            </div>
+        </div>
+
+         <script>
+           var player_bet;
+           var flag=0;
+        
+        $(document).ready(function(){
+            while(!player_bet){
+            player_bet = prompt("Please choose a bet"); 
+            // console.log(player_choice)
+                if (player_bet == '' || player_bet == null)
+                {
+                alert('Sorry! please enter some input');
+                
+                } 
+                else if (player_bet <25 || player_bet >100)
+                {
+                alert('Sorry! please enter valid input');
+                player_bet=''
+                continue;
+                } 
+          
+            }
+           
+        }); 
+        if (player_bet!=''){
+
+            $.ajax({
+              "url": "{% url 'randomization' %}",
+              "dataType": "json",
+
+              success: function( list_cards ){
+                console.log(list_cards)
+                $("#card_1").html(list_cards[0]);
+                $("#card_2").html(list_cards[1]);
+                $("#card_3").html(list_cards[2]);
+            
+                }
+
+            }); 
+            $("#dealer-button").attr("disabled", true);
+
+        }
+        $("#deck_1").attr("disabled", true);
+
+        $("#deck_2").click(function(e) {
+            var playercards=[]
+            var dealercards=[]   
+            $.ajax({
+                  url: "{% url 'deck_card' %}",
+                  type: "get",
+                  dataType:'json',
+                  success: function( deck_card ){
+                    console.log('manibha',deck_card)
+                    var span = document.createElement("span");
+                    $(span).addClass("badge badge-secondary d-flex justify-content-center card");
+                    span.innerHTML = deck_card;
+                    var button = document.createElement("button");
+                    $(button).addClass("btn btn-secondary-sm");
+                    $(button).attr("disabled", true);
+                    $( span ).appendTo( button );
+                    $("#player_space").append(button);
+                    if ($("#dealer-card").html()!='Click on Card'){
+            
+                        console.log('i m in')
+                        var player_div = document.getElementById("player_space");
+                        var player_button = player_div.getElementsByClassName("btn btn-secondary-sm");
+                        for (i=0;i<player_button.length;i++){
+                            playercards.append(player_button[i].outerText)
+                        }
+                        var dealer_div = document.getElementById("dealer_space");
+                        var dealer_button = player_div.getElementsByClassName("btn btn-secondary-sm");
+                        for (i=0;i<dealer_button.length;i++){
+                            dealercards.append(dealer_button[i].outerText)
+                        }
+                        // $.ajax({
+                        //     "url": "{% url 'deck_card' %}",
+                        //     "dataType": "json",
+                        //     "data":{
+                        //     'player_bet':player_bet
+                        //     }
+                        //   // success: function( deck_card ){
+                        //   //   console.log()
+                            
+                        //   //   }
+
+                        // }); 
+                    } 
+
+                    }
+                    
+                });
+            
+            $("#deck_2").attr("disabled", true);
+            $("#deck_1").attr("disabled", false);
+            if (flag==0){
+                $("#dealer-button").attr("disabled", false);
+            }
+            
+        
+            
+        });
+
+        $("#deck_1").click(function(e) {
+            if (flag==1){
+                $.ajax({
+                      "url": "{% url 'deck_card' %}",
+                      "dataType": "json",
+
+                      success: function( deck_card ){
+                        console.log(deck_card)
+                        var span = document.createElement("span");
+                        $(span).addClass("badge badge-secondary d-flex justify-content-center card");
+                        span.innerHTML = deck_card;
+                        var button = document.createElement("button");
+                        $(button).addClass("btn btn-secondary-sm");
+                        $(button).attr("disabled", true);
+                        $( span ).appendTo( button );
+                        $("#dealer_space").append(button);
+
+                        console.log('i m in')
+                        var player_div = document.getElementById("player_space");
+                        var button = player_div.getElementsByClassName("btn btn-secondary-sm");
+                        console.log(button)
+                        // $.ajax({
+                        //     "url": "{% url 'deck_card' %}",
+                        //     "dataType": "json",
+                        //     "data":{
+                        //     'player_bet':player_bet
+                        //     }
+                        //   // success: function( deck_card ){
+                        //   //   console.log()
+                            
+                        //   //   }
+
+                        // }); 
+                        } 
+                    }); 
+                $("#deck_1").attr("disabled", true);
+                $("#deck_2").attr("disabled", false);
+            }
+            else{
+                alert('please pick your second card first')
+            }
+           
+        });
+
+        $("#dealer-button").click(function(e) {
+            flag=1;
+            $.ajax({
+                  "url": "{% url 'deck_card' %}",
+                  "dataType": "json",
+
+                  success: function( deck_card ){
+                    console.log(deck_card)
+                    $("#dealer-card").html(deck_card);
+
+                    
+                    }
+
+                }); 
+            $("#dealer-button").attr("disabled", true);
+        });
+
+    </script>
+    </body>
+</html>
